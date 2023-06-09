@@ -54,8 +54,7 @@ void SetupImGui() {
     ImGui::CreateContext();
     
     ImGuiIO &io = ImGui::GetIO();
-    SetResolution(get_systemWidth(get_main()), get_systemHeight(get_main()), true);
-
+    
     io.IniFilename = g_IniFileName.c_str();
     io.DisplaySize = ImVec2((float)g_GlWidth, (float)g_GlHeight);
 
@@ -81,6 +80,8 @@ EGLBoolean hook_eglSwapBuffers(EGLDisplay dpy, EGLSurface surface) {
     }
 
     ImGuiIO &io = ImGui::GetIO();
+    SetResolution(get_systemWidth(get_main()), get_systemHeight(get_main()), true);
+
 
     ImGui_ImplOpenGL3_NewFrame();
     ImGui_ImplAndroid_NewFrame(g_GlWidth, g_GlHeight);
