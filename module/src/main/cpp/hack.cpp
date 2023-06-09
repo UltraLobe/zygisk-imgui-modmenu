@@ -105,7 +105,7 @@ void hack_start(const char *_game_data_dir) {
 
     // TODO: hooking/patching here
     
-    DobbyHook((void*)((uintptr_t)g_TargetModule.start_address + 0xoffset),(void*)noRecoil,(void**)&old_noRecoil);
+    DobbyHook((void*)((uintptr_t)g_TargetModule.start_address + 0x123451),(void*)noRecoil,(void**)&old_noRecoil);
     
 }
 
