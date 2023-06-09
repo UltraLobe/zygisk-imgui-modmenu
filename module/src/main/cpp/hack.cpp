@@ -118,8 +118,8 @@ void hack_start(const char *_game_data_dir) {
  /*   SetResolution = (void (*)(int, int, bool)) ((uintptr_t) g_TargetModule.start_address + 0x3e9a2b8);
     get_systemWidth = (int (*)(void *)) ((uintptr_t) g_TargetModule.start_address + 0x1964984);
     get_systemHeight = (int (*)(void *)) ((uintptr_t) g_TargetModule.start_address + 0x1964ab8);
-    get_main = (void *(*)()) ((uintptr_t) g_TargetModule.start_address + 0x1965088);
-} */
+    get_main = (void *(*)()) ((uintptr_t) g_TargetModule.start_address + 0x1965088);*/
+} 
 
 void hack_prepare(const char *_game_data_dir) {
     LOGI("hack thread: %d", gettid());
