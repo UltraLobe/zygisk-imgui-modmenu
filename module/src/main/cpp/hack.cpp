@@ -22,7 +22,9 @@ static bool                 g_IsSetup = false;
 static std::string          g_IniFileName = "";
 static utils::module_info   g_TargetModule{};
 
-bool noRecoil;
+
+bool NoRecoil;
+
 
 HOOKAF(void, Input, void *thiz, void *ex_ab, void *ex_ac) {
     origInput(thiz, ex_ab, ex_ac);
@@ -30,11 +32,27 @@ HOOKAF(void, Input, void *thiz, void *ex_ab, void *ex_ac) {
     return;
 }
 
+void (*SetResolution)(int width, int height, bool fullscreen);
+int (*get_systemWidth)(void *instance);
+int (*get_systemHeight)(void *instance);
+void *(*get_main)();
+
+bool (*old_noRecoil)(void*instance);
+bool noRecoil(void*instance) {
+    if (instance!=NULL) {
+        if (NoRecoil) {
+            return true;
+            }
+       }
+    return old_noRecoil(instance) ;
+   }
+
 void SetupImGui() {
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
+    
     ImGuiIO &io = ImGui::GetIO();
-
+    
     io.IniFilename = g_IniFileName.c_str();
     io.DisplaySize = ImVec2((float)g_GlWidth, (float)g_GlHeight);
 
@@ -60,7 +78,9 @@ EGLBoolean hook_eglSwapBuffers(EGLDisplay dpy, EGLSurface surface) {
     }
 
     ImGuiIO &io = ImGui::GetIO();
+    SetResolution(get_systemWidth(get_main()), get_systemHeight(get_main()), true);
 
+    
     ImGui_ImplOpenGL3_NewFrame();
     ImGui_ImplAndroid_NewFrame(g_GlWidth, g_GlHeight);
     ImGui::NewFrame();
@@ -68,7 +88,7 @@ EGLBoolean hook_eglSwapBuffers(EGLDisplay dpy, EGLSurface surface) {
     ImGui::Begin("MGR Team - Sausage Man");
     if (ImGui::BeginTabBar("Tab", ImGuiTabBarFlags_FittingPolicyScroll)) {
         if (ImGui::BeginTabItem("Weapon Menu")) {
-            ImGui::Checkbox("No Recoil", &noRecoil);
+            ImGui::Checkbox("No Recoil", &NoRecoil);
         }
     }
     ImGui::EndTabItem();
@@ -84,6 +104,7 @@ EGLBoolean hook_eglSwapBuffers(EGLDisplay dpy, EGLSurface surface) {
 
 void hack_start(const char *_game_data_dir) {
     LOGI("hack start | %s", _game_data_dir);
+    do {  LOGI("hack start | %s", _game_data_dir);
     do {
         sleep(1);
         g_TargetModule = utils::find_module(TargetLibName);
@@ -92,6 +113,12 @@ void hack_start(const char *_game_data_dir) {
 
     // TODO: hooking/patching here
     
+    DobbyHook((void*)((uintptr_t)g_TargetModule.start_address + 0x1cae0fc),(void*)noRecoil,(void**)&old_noRecoil);
+  
+    SetResolution = (void (*)(int, int, bool)) ((uintptr_t) g_TargetModule.start_address + 0x3e9a2b8);
+    get_systemWidth = (int (*)(void *)) ((uintptr_t) g_TargetModule.start_address + 0x1964984);
+    get_systemHeight = (int (*)(void *)) ((uintptr_t) g_TargetModule.start_address + 0x1964ab8);
+    get_main = (void *(*)()) ((uintptr_t) g_TargetModule.start_address + 0x1965088);
 }
 
 void hack_prepare(const char *_game_data_dir) {
@@ -108,13 +135,6 @@ void hack_prepare(const char *_game_data_dir) {
     
     void *egl_handle = xdl_open("libEGL.so", 0);
     void *eglSwapBuffers = xdl_sym(egl_handle, "eglSwapBuffers", nullptr);
-    if (NULL != eglSwapBuffers) {
-        utils::hook((void*)eglSwapBuffers, (func_t)hook_eglSwapBuffers, (func_t*)&old_eglSwapBuffers);
-    }
-    xdl_close(egl_handle);
-
-    hack_start(_game_data_dir);
-}eglSwapBuffers", nullptr);
     if (NULL != eglSwapBuffers) {
         utils::hook((void*)eglSwapBuffers, (func_t)hook_eglSwapBuffers, (func_t*)&old_eglSwapBuffers);
     }
