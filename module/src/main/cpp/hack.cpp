@@ -21,6 +21,8 @@ static int                  g_GlHeight, g_GlWidth;
 static bool                 g_IsSetup = false;
 static std::string          g_IniFileName = "";
 static utils::module_info   g_TargetModule{};
+
+
 bool NoRecoil;
 
 
@@ -33,7 +35,7 @@ HOOKAF(void, Input, void *thiz, void *ex_ab, void *ex_ac) {
 
 bool (*old_noRecoil)(void*instance);
 bool noRecoil(void*instance) {
-    if (instance! =NULL) {
+    if (instance!=NULL) {
         if (NoRecoil) {
             return true;
             }
