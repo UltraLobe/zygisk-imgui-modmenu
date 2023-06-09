@@ -24,11 +24,6 @@ static utils::module_info   g_TargetModule{};
 
 
 bool NoRecoil;
-void (*SetResolution)(int width, int height, bool fullscreen);
-int (*get_systemWidth)(void *instance);
-int (*get_systemHeight)(void *instance);
-void *(*get_main)();
-
 
 
 HOOKAF(void, Input, void *thiz, void *ex_ab, void *ex_ac) {
@@ -38,6 +33,9 @@ HOOKAF(void, Input, void *thiz, void *ex_ab, void *ex_ac) {
 }
 
 void (*SetResolution)(int width, int height, bool fullscreen);
+int (*get_systemWidth)(void *instance);
+int (*get_systemHeight)(void *instance);
+void *(*get_main)();
 
 bool (*old_noRecoil)(void*instance);
 bool noRecoil(void*instance) {
