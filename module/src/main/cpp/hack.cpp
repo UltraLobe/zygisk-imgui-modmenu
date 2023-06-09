@@ -23,8 +23,30 @@ static std::string          g_IniFileName = "";
 static utils::module_info   g_TargetModule{};
 
 
-bool NoRecoil;
+HOOKAF(void, Input, void *thiz, void *ex_ab, void *ex_ac) {
+#include <cstdint>
+#include <cstring>
+#include <cstdio>
+#include <unistd.h>
+#include <dlfcn.h>
+#include <string>
+#include <EGL/egl.h>
+#include <GLES3/gl3.h>
 
+#include "hack.h"
+#include "log.h"
+#include "game.h"
+#include "utils.h"
+#include "xdl.h"
+#include "imgui.h"
+#include "imgui_impl_android.h"
+#include "imgui_impl_opengl3.h"
+#include "MemoryPatch.h"
+
+static int                  g_GlHeight, g_GlWidth;
+static bool                 g_IsSetup = false;
+static std::string          g_IniFileName = "";
+static utils::module_info   g_TargetModule{};
 
 HOOKAF(void, Input, void *thiz, void *ex_ab, void *ex_ac) {
     origInput(thiz, ex_ab, ex_ac);
@@ -32,23 +54,11 @@ HOOKAF(void, Input, void *thiz, void *ex_ab, void *ex_ac) {
     return;
 }
 
-
-bool (*old_noRecoil)(void*instance);
-bool noRecoil(void*instance) {
-    if (instance!=NULL) {
-        if (NoRecoil) {
-            return true;
-            }
-       }
-    return old_noRecoil(instance) ;
-   }
-
 void SetupImGui() {
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
-    
     ImGuiIO &io = ImGui::GetIO();
-    
+
     io.IniFilename = g_IniFileName.c_str();
     io.DisplaySize = ImVec2((float)g_GlWidth, (float)g_GlHeight);
 
@@ -74,21 +84,12 @@ EGLBoolean hook_eglSwapBuffers(EGLDisplay dpy, EGLSurface surface) {
     }
 
     ImGuiIO &io = ImGui::GetIO();
-    
 
     ImGui_ImplOpenGL3_NewFrame();
     ImGui_ImplAndroid_NewFrame(g_GlWidth, g_GlHeight);
     ImGui::NewFrame();
 
-    ImGui::Begin("MGR Team - Sausage Man");
-    if (ImGui::BeginTabBar("Tab", ImGuiTabBarFlags_FittingPolicyScroll)) {
-        if (ImGui::BeginTabItem("Weapon Menu")) {
-            ImGui::Checkbox("No Recoil", &NoRecoil);
-        }
-    }
-    ImGui::EndTabItem();
-    ImGui::EndTabBar();
-    ImGui::End();
+    ImGui::ShowDemoWindow();
 
     ImGui::EndFrame();
     ImGui::Render();
@@ -99,7 +100,6 @@ EGLBoolean hook_eglSwapBuffers(EGLDisplay dpy, EGLSurface surface) {
 
 void hack_start(const char *_game_data_dir) {
     LOGI("hack start | %s", _game_data_dir);
-    do {  LOGI("hack start | %s", _game_data_dir);
     do {
         sleep(1);
         g_TargetModule = utils::find_module(TargetLibName);
@@ -108,9 +108,6 @@ void hack_start(const char *_game_data_dir) {
 
     // TODO: hooking/patching here
     
-    DobbyHook((void*)((uintptr_t)g_TargetModule.start_address + 0x1cae0fc),(void*)noRecoil,(void**)&old_noRecoil);
-  
-
 }
 
 void hack_prepare(const char *_game_data_dir) {
