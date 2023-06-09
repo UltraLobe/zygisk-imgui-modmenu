@@ -26,6 +26,8 @@ static utils::module_info   g_TargetModule{};
 bool NoRecoil;
 
 
+
+
 HOOKAF(void, Input, void *thiz, void *ex_ab, void *ex_ac) {
     origInput(thiz, ex_ab, ex_ac);
     ImGui_ImplAndroid_HandleInputEvent((AInputEvent *)thiz);
@@ -36,84 +38,6 @@ void (*SetResolution)(int width, int height, bool fullscreen);
 int (*get_systemWidth)(void *instance);
 int (*get_systemHeight)(void *instance);
 void *(*get_main)();
-
-bool (*old_noRecoil)(void*instance);
-bool noRecoil(void*instance) {
-    if (instance!=NULL) {
-        if (NoRecoil) {
-            return true;
-            }
-       }
-    return old_noRecoil(instance) ;
-   }
-
-void SetupImGui() {
-    IMGUI_CHECKVERSION();
-    ImGui::CreateContext();
-    
-    ImGuiIO &io = ImGui::GetIO();
-    SetResolution(get_systemWidth(get_main()), get_systemHeight(get_main()), true);
-
-    io.IniFilename = g_IniFileName.c_str();
-    io.DisplaySize = ImVec2((float)g_GlWidth, (float)g_GlHeight);
-
-    ImGui_ImplAndroid_Init(nullptr);
-    ImGui_ImplOpenGL3_Init("#version 300 es");
-    ImGui::StyleColorsLight();
-
-    ImFontConfig font_cfg;
-    font_cfg.SizePixels = 22.0f;
-    io.Fonts->AddFontDefault(&font_cfg);
-
-    ImGui::GetStyle().ScaleAllSizes(3.0f);
-}
-
-EGLBoolean (*old_eglSwapBuffersrs)(EGLDisplay dpy, EGLSurface surface);
-EGLBoolean hook_eglSwapBuffers(EGLDisplay dpy, EGLSurface surface) {
-    eglQuerySurface(dpy, surface, EGL_WIDTH, &g_GlWidth);
-    eglQuerySurface(dpy, surface, EGL_HEIGHT, &g_GlHeight);
-
-    if (!g_IsSetup) {
-#include <cstdint>
-#include <cstring>
-#include <cstdio>
-#include <unistd.h>
-#include <dlfcn.h>
-#include <string>
-#include <EGL/egl.h>
-#include <GLES3/gl3.h>
-
-#include "hack.h"
-#include "log.h"
-#include "game.h"
-#include "utils.h"
-#include "xdl.h"
-#include "imgui.h"
-#include "imgui_impl_android.h"
-#include "imgui_impl_opengl3.h"
-#include "MemoryPatch.h"
-
-static int                  g_GlHeight, g_GlWidth;
-static bool                 g_IsSetup = false;
-static std::string          g_IniFileName = "";
-static utils::module_info   g_TargetModule{};
-
-
-bool NoRecoil;
-void (*SetResolution)(int width, int height, bool fullscreen);
-int (*get_systemWidth)(void *instance);
-int (*get_systemHeight)(void *instance);
-void *(*get_main)();
-
-
-
-HOOKAF(void, Input, void *thiz, void *ex_ab, void *ex_ac) {
-    origInput(thiz, ex_ab, ex_ac);
-    ImGui_ImplAndroid_HandleInputEvent((AInputEvent *)thiz);
-    return;
-}
-
-void (*SetResolution)(int width, int height, bool fullscreen);
 
 bool (*old_noRecoil)(void*instance);
 bool noRecoil(void*instance) {
