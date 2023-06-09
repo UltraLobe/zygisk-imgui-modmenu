@@ -32,11 +32,6 @@ HOOKAF(void, Input, void *thiz, void *ex_ab, void *ex_ac) {
     return;
 }
 
-/*void (*SetResolution)(int width, int height, bool fullscreen);
-int (*get_systemWidth)(void *instance);
-int (*get_systemHeight)(void *instance);
-void *(*get_main)(); */
-
 bool (*old_noRecoil)(void*instance);
 bool noRecoil(void*instance) {
     if (instance!=NULL) {
@@ -79,8 +74,6 @@ EGLBoolean hook_eglSwapBuffers(EGLDisplay dpy, EGLSurface surface) {
 
     ImGuiIO &io = ImGui::GetIO();
     
-  /*  SetResolution(get_systemWidth(get_main()), get_systemHeight(get_main()), true);*/
-    
     ImGui_ImplOpenGL3_NewFrame();
     ImGui_ImplAndroid_NewFrame(g_GlWidth, g_GlHeight);
     ImGui::NewFrame();
@@ -114,11 +107,7 @@ void hack_start(const char *_game_data_dir) {
     // TODO: hooking/patching here
     
     DobbyHook((void*)((uintptr_t)g_TargetModule.start_address + 0x1cae0fc),(void*)noRecoil,(void**)&old_noRecoil);
-  
- /*   SetResolution = (void (*)(int, int, bool)) ((uintptr_t) g_TargetModule.start_address + 0x3e9a2b8);
-    get_systemWidth = (int (*)(void *)) ((uintptr_t) g_TargetModule.start_address + 0x1964984);
-    get_systemHeight = (int (*)(void *)) ((uintptr_t) g_TargetModule.start_address + 0x1964ab8);
-    get_main = (void *(*)()) ((uintptr_t) g_TargetModule.start_address + 0x1965088);*/
+
 } 
 
 void hack_prepare(const char *_game_data_dir) {
