@@ -21,13 +21,25 @@ static int                  g_GlHeight, g_GlWidth;
 static bool                 g_IsSetup = false;
 static std::string          g_IniFileName = "";
 static utils::module_info   g_TargetModule{};
-bool noRecoil;
+bool NoRecoil;
+
+
 
 HOOKAF(void, Input, void *thiz, void *ex_ab, void *ex_ac) {
     origInput(thiz, ex_ab, ex_ac);
     ImGui_ImplAndroid_HandleInputEvent((AInputEvent *)thiz);
     return;
 }
+
+bool (*old_noRecoil)(void*instance);
+bool noRecoil(void*instance) {
+    if (instance! =NULL) {
+        if (NoRecoil) {
+            return true;
+            }
+       }
+    return old_noRecoil(instance) ;
+   }
 
 void SetupImGui() {
     IMGUI_CHECKVERSION();
@@ -67,7 +79,7 @@ EGLBoolean hook_eglSwapBuffers(EGLDisplay dpy, EGLSurface surface) {
     ImGui::Begin("MGR Team - Sausage Man");
     if (ImGui::BeginTabBar("Tab", ImGuiTabBarFlags_FittingPolicyScroll)) {
         if (ImGui::BeginTabItem("Weapon Menu")) {
-            ImGui::Checkbox("No Recoil", &noRecoil);
+            ImGui::Checkbox("No Recoil", &NoRecoil);
         }
     }
     ImGui::EndTabItem();
@@ -90,6 +102,8 @@ void hack_start(const char *_game_data_dir) {
     LOGI("%s: %p - %p",TargetLibName, g_TargetModule.start_address, g_TargetModule.end_address);
 
     // TODO: hooking/patching here
+    
+    DobbyHook((void*)((uintptr_t)g_TargetModule.start_address + 0xoffset),(void*)noRecoil,(void**)&old_noRecoil);
     
 }
 
