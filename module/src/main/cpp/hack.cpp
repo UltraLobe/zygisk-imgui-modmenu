@@ -62,16 +62,8 @@ EGLBoolean hook_eglSwapBuffers(EGLDisplay dpy, EGLSurface surface) {
     ImGui_ImplOpenGL3_NewFrame();
     ImGui_ImplAndroid_NewFrame(g_GlWidth, g_GlHeight);
     ImGui::NewFrame();
-    
-    ImGui::Begin("MGR Team - Sausage Man");
-    if (ImGui::BeginTabBar("Tab", ImGuiTabBarFlags_FittingPolicyScroll)) {
-        if (ImGui::BeginTabItem("Weapon Menu")) {
-            ImGui::Checkbox("No Recoil", &noRecoil);
-        }
-    }
-    ImGui::EndTabItem();
-    ImGui::EndTabBar();
-    ImGui::End();
+
+    ImGui::ShowDemoWindow();
 
     ImGui::EndFrame();
     ImGui::Render();
@@ -106,6 +98,13 @@ void hack_prepare(const char *_game_data_dir) {
     
     void *egl_handle = xdl_open("libEGL.so", 0);
     void *eglSwapBuffers = xdl_sym(egl_handle, "eglSwapBuffers", nullptr);
+    if (NULL != eglSwapBuffers) {
+        utils::hook((void*)eglSwapBuffers, (func_t)hook_eglSwapBuffers, (func_t*)&old_eglSwapBuffers);
+    }
+    xdl_close(egl_handle);
+
+    hack_start(_game_data_dir);
+}eglSwapBuffers", nullptr);
     if (NULL != eglSwapBuffers) {
         utils::hook((void*)eglSwapBuffers, (func_t)hook_eglSwapBuffers, (func_t*)&old_eglSwapBuffers);
     }
